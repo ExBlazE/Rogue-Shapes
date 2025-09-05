@@ -2,10 +2,8 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
-    [SerializeField]
-    private float speed = 15f;
-    [SerializeField]
-    private float duration = 3f;
+    [SerializeField] private float speed = 15f;
+    [SerializeField] private float duration = 3f;
 
     void FixedUpdate()
     {
