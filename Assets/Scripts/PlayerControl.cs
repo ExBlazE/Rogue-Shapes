@@ -1,37 +1,19 @@
-using System.Runtime.CompilerServices;
 using UnityEngine;
-using UnityEngine.Scripting.APIUpdating;
 
 public class PlayerControl : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject orbFocus;
-    [SerializeField]
-    private GameObject orbObject;
-    [SerializeField]
-    private GameObject mouseFocus;
+    [SerializeField] private GameObject orbFocus;
+    [SerializeField] private GameObject orbObject;
+    [SerializeField] private LayerMask targetLayers;
 
-    [SerializeField]
-    private float moveSpeed = 1.0f;
+    [SerializeField] private float moveSpeed = 1.0f;
 
     [Space]
 
-    [SerializeField]
-    private GameObject projectilePrefab;
-    [SerializeField]
-    private float shotCooldown = 0.3f;
+    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private float shotCooldown = 0.3f;
     private float currentCooldown = 0f;
 
-    private Ray ray;
-    private RaycastHit hit;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
     void FixedUpdate()
     {
         Move();
@@ -56,21 +38,27 @@ public class PlayerControl : MonoBehaviour
 
     void Move()
     {
-        float verMove = Input.GetAxis("Vertical") * moveSpeed * Time.deltaTime;
-        float horMove = Input.GetAxis("Horizontal") * moveSpeed * Time.deltaTime;
+        float verticalMove = Input.GetAxis("Vertical") * moveSpeed * Time.deltaTime;
+        float horizontalMove = Input.GetAxis("Horizontal") * moveSpeed * Time.deltaTime;
 
-        transform.Translate(horMove, 0, verMove);
+        Vector3 movement = new Vector3(horizontalMove, 0, verticalMove);
+
+        movement = Vector3.ClampMagnitude(movement, 1.0f);
+
+        transform.Translate(movement * moveSpeed * Time.deltaTime);
     }
 
     void MoveOrb()
     {
-        ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit))
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, targetLayers))
         {
-            mouseFocus.transform.position = new Vector3 (hit.point.x, 0, hit.point.z);
+            Vector3 mousePosition = hit.point;
+            Vector3 mouseDirection = mousePosition - orbFocus.transform.position;
+            Quaternion targetRotation = Quaternion.LookRotation(mouseDirection);
+            orbFocus.transform.rotation = Quaternion.Euler(0, targetRotation.eulerAngles.y, 0);
         }
-
-        orbFocus.transform.LookAt(mouseFocus.transform);
     }
 }
