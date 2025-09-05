@@ -18,8 +18,11 @@ public class PlayerControl : MonoBehaviour
     [Header("Shield")]
     [SerializeField] private GameObject shieldObject;
 
-    void Start()
+    public static PlayerControl Instance;
+
+    void Awake()
     {
+        Instance = this;
         shieldObject.SetActive(false);
     }
 
@@ -60,11 +63,15 @@ public class PlayerControl : MonoBehaviour
 
     void Move()
     {
-        float verticalMove = Input.GetAxis("Vertical") * moveSpeed * Time.deltaTime;
-        float horizontalMove = Input.GetAxis("Horizontal") * moveSpeed * Time.deltaTime;
+        float verticalMove = Input.GetAxis("Vertical");
+        float horizontalMove = Input.GetAxis("Horizontal");
 
         Vector3 movement = new Vector3(horizontalMove, 0, verticalMove);
 
+        // Normalize method only allows magnitude 0 or 1. Use only one.
+        // movement.Normalize();
+
+        // ClampMagnitude method allows magnitude range of 0~1. Use only one.
         movement = Vector3.ClampMagnitude(movement, 1.0f);
 
         transform.Translate(movement * moveSpeed * Time.deltaTime);
