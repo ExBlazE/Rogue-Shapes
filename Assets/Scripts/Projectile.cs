@@ -7,7 +7,10 @@ public class Projectile : MonoBehaviour
 
     void Update()
     {
+        // Move projectile forward at constant speed
         transform.Translate(Vector3.forward * speed * Time.deltaTime);
+
+        // Destroy projectile after set duration
         if (duration > 0)
         {
             duration -= Time.deltaTime;
@@ -20,10 +23,26 @@ public class Projectile : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Enemy"))
+        // Logic for player projectiles hitting enemies
+        if (gameObject.CompareTag("Shot_Player") && other.CompareTag("Enemy"))
         {
             Destroy(other.gameObject);
             Destroy(gameObject);
+        }
+
+        else if (gameObject.CompareTag("Shot_Enemy"))
+        {
+            // Logic for enemy projectiles hitting shield
+            if (other.CompareTag("Shield"))
+            {
+                Destroy(gameObject);
+            }
+
+            //Logic for enemy projectiles hitting player
+            else if (other.CompareTag("Player"))
+            {
+                Destroy(gameObject);
+            }
         }
     }
 }

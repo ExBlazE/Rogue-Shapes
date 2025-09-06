@@ -112,7 +112,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Version: 3
   m_UsePipelineSettings: 1
-  m_AdditionalLightsShadowResolutionTier: 2
+  m_AdditionalLightsShadowResolutionTier: 0
   m_LightLayerMask: 1
   m_RenderingLayers: 1
   m_CustomShadowLayers: 0
@@ -137,7 +137,7 @@ GameObject:
   - component: {fileID: 8205006219963308207}
   m_Layer: 0
   m_Name: Projectile
-  m_TagString: Untagged
+  m_TagString: Shot_Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -325,6 +325,14 @@ PrefabInstance:
     - target: {fileID: 3586496746127070240, guid: 317079de8d095f64692e3cf98ef57d88, type: 3}
       propertyPath: m_Name
       value: Projectile_Particle
+      objectReference: {fileID: 0}
+    - target: {fileID: 5027089185658563778, guid: 317079de8d095f64692e3cf98ef57d88, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.g
+      value: 0.49803922
+      objectReference: {fileID: 0}
+    - target: {fileID: 5027089185658563778, guid: 317079de8d095f64692e3cf98ef57d88, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.r
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

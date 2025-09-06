@@ -22,16 +22,29 @@ public class PlayerControl : MonoBehaviour
 
     void Awake()
     {
-        Instance = this;
+        // Singleton reference to this script
+        if (Instance == null)
+            Instance = this;
+        else
+            Destroy(gameObject);
+
+        // Set max frame rate to avoid errors in editor
+        Application.targetFrameRate = 144;        
+    }
+
+    void Start()
+    {
+        // Disable shield by default at start
         shieldObject.SetActive(false);
     }
 
     void Update()
     {
+        // Move player and rotate orb
         Move();
         MoveOrb();
         
-        // Shoot projectile on mouse left-click and when cooldown is zero
+        // Shoot projectile on left-click and when cooldown is zero
         if (Input.GetKeyDown(KeyCode.Mouse0) && currentCooldown == 0)
         {
             Instantiate(projectilePrefab, orbObject.transform.position, orbFocus.transform.rotation);
@@ -46,7 +59,7 @@ public class PlayerControl : MonoBehaviour
                 currentCooldown = 0;
         }
 
-        // Enable shield when mouse right-click is held down
+        // Enable shield when right-click is held down
         if (Input.GetKey(KeyCode.Mouse1))
         {
             if (!shieldObject.activeInHierarchy)
@@ -61,22 +74,24 @@ public class PlayerControl : MonoBehaviour
         }
     }
 
+    // Method to move player
     void Move()
     {
+        // Get player input via WASD
         float verticalMove = Input.GetAxis("Vertical");
         float horizontalMove = Input.GetAxis("Horizontal");
 
+        // Create direction vector based on player input
         Vector3 movement = new Vector3(horizontalMove, 0, verticalMove);
 
-        // Normalize method only allows magnitude 0 or 1. Use only one.
-        // movement.Normalize();
-
-        // ClampMagnitude method allows magnitude range of 0~1. Use only one.
+        // Clamp direction vector magnitude at 1 to prevent faster diagonal speed
         movement = Vector3.ClampMagnitude(movement, 1.0f);
 
+        // Move player
         transform.Translate(movement * moveSpeed * Time.deltaTime);
     }
 
+    // Method to spin orb around player to always point at mouse position
     void MoveOrb()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -84,8 +99,11 @@ public class PlayerControl : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, targetLayers))
         {
+            // Get mouse position on ground level and direction from player
             Vector3 mousePosition = hit.point;
             Vector3 mouseDirection = mousePosition - orbFocus.transform.position;
+
+            // Create new rotation facing mouse direction and apply it to orbFocus
             Quaternion targetRotation = Quaternion.LookRotation(mouseDirection);
             orbFocus.transform.rotation = Quaternion.Euler(0, targetRotation.eulerAngles.y, 0);
         }

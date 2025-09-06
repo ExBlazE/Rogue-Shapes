@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Enemy
   - Orb
+  - Shot_Player
+  - Shot_Enemy
+  - Shield
   layers:
   - Default
   - TransparentFX

@@ -49,6 +49,9 @@ MonoBehaviour:
   focus: {fileID: 8316879828047716102}
   moveSpeed: 2.5
   rotateSpeed: 180
+  projectilePrefab: {fileID: 579643021003358216, guid: 49410fd25052dad409bb880e81bdd6c4, type: 3}
+  shotRange: 15
+  shotCooldown: 2.5
 --- !u!65 &4767361839464800062
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -268,7 +271,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Version: 3
   m_UsePipelineSettings: 1
-  m_AdditionalLightsShadowResolutionTier: 2
+  m_AdditionalLightsShadowResolutionTier: 0
   m_LightLayerMask: 1
   m_RenderingLayers: 1
   m_CustomShadowLayers: 0
