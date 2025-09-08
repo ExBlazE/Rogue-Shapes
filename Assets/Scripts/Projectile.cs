@@ -5,6 +5,21 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float speed = 15f;
     [SerializeField] private float duration = 3f;
 
+    [Space]
+    [SerializeField] private int enemyShotDamage = 10;
+
+    private PlayerControl player;
+    private GameManager gameManager;
+
+    void Start()
+    {
+        // Get reference to singleton player script
+        player = PlayerControl.Instance;
+
+        // Get reference to singleton GameManager script
+        gameManager = GameManager.Instance;
+    }
+
     void Update()
     {
         // Move projectile forward at constant speed
@@ -26,21 +41,25 @@ public class Projectile : MonoBehaviour
         // Logic for player projectiles hitting enemies
         if (gameObject.CompareTag("Shot_Player") && other.CompareTag("Enemy"))
         {
+            gameManager.AddScore(1);
             Destroy(other.gameObject);
             Destroy(gameObject);
         }
 
+        // Logic for enemy projectiles
         else if (gameObject.CompareTag("Shot_Enemy"))
         {
-            // Logic for enemy projectiles hitting shield
+            // Logic for hitting shield
             if (other.CompareTag("Shield"))
             {
+                player.ModifyShield(-enemyShotDamage);
                 Destroy(gameObject);
             }
 
-            //Logic for enemy projectiles hitting player
+            //Logic for hitting player
             else if (other.CompareTag("Player"))
             {
+                player.ModifyHealth(-enemyShotDamage);
                 Destroy(gameObject);
             }
         }
