@@ -1154,7 +1154,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &939074940
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2032,7 +2032,7 @@ Light:
   serializedVersion: 11
   m_Type: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 50
+  m_Intensity: 25
   m_Range: 100
   m_SpotAngle: 96
   m_InnerSpotAngle: 89
@@ -2600,6 +2600,7 @@ MonoBehaviour:
   shieldRegenPerSecond: 10
   shieldCostPerSecond: 5
   shieldRegenCooldown: 3
+  shieldFadeDuration: 0.15
   healthSlider: {fileID: 1920082886}
   shieldSlider: {fileID: 442598038}
   maxHealth: 100

@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,6 +15,7 @@ public class PlayerControl : MonoBehaviour
     [Header("Shooting")]
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private float shotCooldown = 0.3f;
+
     private float currentShotCooldown = 0f;
 
     [Header("Shield")]
@@ -21,8 +23,14 @@ public class PlayerControl : MonoBehaviour
     [SerializeField] private float shieldRegenPerSecond = 10f;
     [SerializeField] private float shieldCostPerSecond = 5f;
     [SerializeField] private float shieldRegenCooldown = 3f;
+    [SerializeField] private float shieldFadeDuration = 0.1f;
+    [SerializeField] private const string shieldAlphaName = "_Alpha";
+
     private float currentShieldRegenCooldown;
     private bool isShieldActive;
+    private Renderer shieldRenderer;
+    private bool shieldFading = false;
+    private bool fadeOutQueued = false;
 
     [Header("UI")]
     [SerializeField] private Slider healthSlider;
@@ -76,6 +84,9 @@ public class PlayerControl : MonoBehaviour
         shieldObject.SetActive(false);
         isShieldActive = false;
         currentShieldRegenCooldown = 0;
+
+        // Get shield's renderer component
+        shieldRenderer = shieldObject.GetComponent<Renderer>();
     }
 
     void Update()
@@ -94,7 +105,7 @@ public class PlayerControl : MonoBehaviour
             currentShotCooldown = shotCooldown;
         }
 
-        // Reduce cooldown to zero
+        // Reduce shot cooldown to zero
         if (currentShotCooldown > 0)
         {
             currentShotCooldown -= Time.deltaTime;
@@ -102,12 +113,13 @@ public class PlayerControl : MonoBehaviour
                 currentShotCooldown = 0;
         }
 
-        // Enable shield when right-click is held down
+        // Enable shield when right-click is clicked
         if (Input.GetKeyDown(KeyCode.Mouse1))
         {
-            if (!isShieldActive && shield > 0)
+            if (!isShieldActive && shield > 0 && !shieldFading)
             {
-                ShieldActive(true);
+                StartCoroutine(ShieldEnable(true));
+                currentShieldRegenCooldown = shieldRegenCooldown;
             }
         }
 
@@ -116,14 +128,17 @@ public class PlayerControl : MonoBehaviour
         {
             if (isShieldActive)
             {
-                ShieldActive(false);
+                StartCoroutine(ShieldEnable(false));
             }
         }
 
         // Disable shield when value below zero
         if (shield <= 0)
         {
-            ShieldActive(false);
+            if (isShieldActive)
+            {
+                StartCoroutine(ShieldEnable(false));
+            }
         }
 
         // Decrease shield value when active
@@ -226,19 +241,81 @@ public class PlayerControl : MonoBehaviour
             shield = maxShield;
     }
 
-    // Method to enable or disable shield
-    void ShieldActive(bool changeToState)
+    // Coroutine to enable or disable shield
+    IEnumerator ShieldEnable(bool enabled)
     {
-        if (changeToState)
+        // This block is meant to queue up a single fade-out after a fade-in
+        // Runs only if right-click is released too quickly
+        if (shieldFading)
         {
+            if (!fadeOutQueued)
+            {
+                fadeOutQueued = true;
+                while (shieldFading)
+                    yield return null;
+            }
+            else
+                yield break;
+        }
+
+        // Set flag to indicate shield is fading
+        shieldFading = true;
+
+        float startAlpha;
+        float endAlpha;
+
+        float timeElapsed = 0f;
+
+        // Set start and end values of alpha for fading in
+        if (enabled)
+        {
+            startAlpha = 0f;
+            endAlpha = 1f;
+
+            // Activate the shield game object
             shieldObject.SetActive(true);
             isShieldActive = true;
-            currentShieldRegenCooldown = shieldRegenCooldown;
         }
-        else if (!changeToState)
+
+        // Set start and end values of alpha for fading out
+        // We don't deactivate shield here because it's done after the fade out animation
+        else
+        {
+            startAlpha = 1f;
+            endAlpha = 0f;
+        }        
+
+        // Set gradually increasing or decrease alpha value per frame until end value
+        while (timeElapsed < shieldFadeDuration)
+        {
+            // Calculate the new alpha value for this frame
+            float newAlpha = Mathf.Lerp(startAlpha, endAlpha, timeElapsed / shieldFadeDuration);
+
+            // Clamp the min and max values of alpha
+            if (newAlpha < 0f)
+                newAlpha = 0f;
+            else if (newAlpha > 1f)
+                newAlpha = 1f;
+
+            // Set the new alpha value for this frame
+            shieldRenderer.material.SetFloat(shieldAlphaName, newAlpha);
+
+            // Increase progress indicator of the fade for next rerun of the loop
+            timeElapsed += Time.deltaTime;
+
+            // Pause the coroutine until next frame
+            yield return null;
+        }
+
+        // If fading out, deactivate shield object and reset queue flag
+        if (!enabled)
         {
             shieldObject.SetActive(false);
             isShieldActive = false;
+            fadeOutQueued = false;
         }
+
+        // Set flag to indicate that fading is complete
+        shieldFading = false;
     }
 }
