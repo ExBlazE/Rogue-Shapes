@@ -3,16 +3,28 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private GameObject focus;
+    [SerializeField] private bool canMove = true;
     [SerializeField] private float moveSpeed = 2.5f;
     [SerializeField] private float rotateSpeed = 180f;
 
     [Space]
     [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private bool canShoot = true;
     [SerializeField] private float shotRange = 15f;
-    private float shotRangeSqr;
-
     [SerializeField] private float shotCooldown = 2.5f;
+    [SerializeField] private float collisionDamage = 20f;
+
+    private float shotRangeSqr;
     private float currentCooldown = 0f;
+
+    private Rigidbody enemyRb;
+    private PlayerControl player;
+
+    void Awake()
+    {
+        player = PlayerControl.Instance;
+        enemyRb = GetComponent<Rigidbody>();
+    }
 
     void Start()
     {
@@ -22,19 +34,14 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        // Get player's current position via singleton
-        Vector3 playerPosition = PlayerControl.Instance.transform.position;
-
-        MoveTowardsPlayer(playerPosition);
-
         // Calculate distance-squared to player
-        float distanceToPlayerSqr = (playerPosition - transform.position).sqrMagnitude;
+        float distanceToPlayerSqr = (player.transform.position - transform.position).sqrMagnitude;
 
         // If within range and cooldown is zero, shoot projectile
         // We use square of both numbers because Vector3.magnitude takes more time for CPU
         if (distanceToPlayerSqr < shotRangeSqr)
         {
-            if (currentCooldown == 0)
+            if (currentCooldown == 0 && canShoot)
             {
                 Instantiate(projectilePrefab, focus.transform.position, transform.rotation);
                 currentCooldown = shotCooldown;
@@ -53,17 +60,57 @@ public class Enemy : MonoBehaviour
         focus.transform.Rotate(new Vector3(0, 0, rotateSpeed * Time.deltaTime), Space.World);
     }
 
-    // Method to move enemy towards player's position
-    void MoveTowardsPlayer(Vector3 playerPosition)
+    void FixedUpdate()
     {
-        // Get direction of player from enemy position
-        Vector3 direction = playerPosition - transform.position;
+        MoveTowardsPlayer();
+    }
 
-        // Create new rotation facing player and apply it to enemy
-        Quaternion targetRotation = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.Euler(0, targetRotation.eulerAngles.y, 0);
+    // Method to move enemy towards player's position
+    void MoveTowardsPlayer()
+    {
+        // If movement is enabled in inspector
+        if (canMove)
+        {
+            // Get direction of player from enemy position
+            Vector3 direction = player.transform.position - enemyRb.position;
 
-        // Move enemy towards player
-        transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
+            // Create new rotation facing player and apply it to enemy
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Euler(0, targetRotation.eulerAngles.y, 0);
+
+            // Move enemy towards player (non-physics method)
+            // transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
+
+            // Move enemy towards player (physics method)
+            enemyRb.linearVelocity = enemyRb.transform.forward * moveSpeed;
+        }
+
+        // If movement is disabled in inspector
+        else
+        {
+            enemyRb.linearVelocity = Vector3.zero;
+        }
+    }
+
+    // Logic to handle enemy touching player
+    void OnCollisionEnter(Collision collision)
+    {
+        // If touching player, deplete health
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            player.ModifyHealth(-collisionDamage);
+            Destroy(gameObject);
+        }
+    }
+
+    // Logic to handle enemy touching shield
+    void OnTriggerEnter(Collider other)
+    {
+        // If touching shield, deplete shield
+        if (other.CompareTag("Shield"))
+        {
+            player.ModifyShield(-collisionDamage);
+            Destroy(gameObject);
+        }
     }
 }

@@ -9,12 +9,14 @@ public class BoundaryBehaviour : MonoBehaviour
 
     void Start()
     {
+        // Get singleton reference to player
         player = PlayerControl.Instance;
         isInPlayArea = true;
     }
 
     void Update()
     {
+        // If player not in play area, reduce health
         if (!isInPlayArea)
         {
             float reduceHealth = healthPenalty * Time.deltaTime;
@@ -22,12 +24,14 @@ public class BoundaryBehaviour : MonoBehaviour
         }
     }
 
+    // Detect when player leaves play area
     void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
             isInPlayArea = false;
     }
 
+    // Detect when player enters play area
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))

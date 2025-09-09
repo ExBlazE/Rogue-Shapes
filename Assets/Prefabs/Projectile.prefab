@@ -273,7 +273,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 20
-  duration: 2.5
+  duration: 2
+  enemyShotDamage: 10
 --- !u!1001 &3377203784661916984
 PrefabInstance:
   m_ObjectHideFlags: 0

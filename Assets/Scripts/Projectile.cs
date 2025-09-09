@@ -6,7 +6,7 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float duration = 3f;
 
     [Space]
-    [SerializeField] private int enemyShotDamage = 10;
+    [SerializeField] private float enemyShotDamage = 10;
 
     private PlayerControl player;
     private GameManager gameManager;

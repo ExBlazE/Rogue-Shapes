@@ -4,21 +4,57 @@ using UnityEngine;
 public class SpawnManager : MonoBehaviour
 {
     [SerializeField] private GameObject enemyPrefab;
-    [SerializeField] private float spawnDelay = 2.0f;
+
+    [Space]
+    [SerializeField] private float spawnDelayStart = 3.0f;
+    [SerializeField] private float spawnDelayReduce = 0.5f;
+    [SerializeField] private float spawnDelayMin = 0.5f;
+
+    [Space]
+    [SerializeField] private int stageLength = 20;
+
+    [Space]
     [SerializeField] private float spawnDistance = 25f;
+
+    private GameManager gameManager;
+
+    void Awake()
+    {
+        // Get game manager reference via singleton
+        gameManager = GameManager.Instance;
+    }
 
     void Start()
     {
+        // Start coroutine to spawn enemies
         StartCoroutine(SpawnEnemyWave());
     }
 
-    // Coroutine to continuously spawn enemies after a certain interval
+    // Coroutine to spawn enemies with increasing difficulty
     IEnumerator SpawnEnemyWave()
     {
+        float spawnDelay = spawnDelayStart;
+        int currentStage = 0;
+
+        // Loop to spawn single enemies continuously with a delay in between
         while (true)
         {
+            // Spawn a single enemy
             SpawnEnemy();
 
+            // Get the current difficulty stage
+            int newStage = (int)gameManager.GetTimeAlive() / stageLength;
+
+            // If stage advances, set new stage and reduce delay between enemy spawns
+            if (currentStage < newStage)
+            {
+                currentStage = newStage;
+                spawnDelay -= spawnDelayReduce;
+                if (spawnDelay < spawnDelayMin)
+                    spawnDelay = spawnDelayMin;
+            }
+
+            // Wait out the delay before re-running spawn loop
             yield return new WaitForSeconds(spawnDelay);
         }
     }

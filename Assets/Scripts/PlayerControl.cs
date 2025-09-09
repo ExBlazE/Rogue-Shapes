@@ -34,6 +34,10 @@ public class PlayerControl : MonoBehaviour
     [SerializeField] private float health;
     [SerializeField] private float shield;
 
+    private Rigidbody playerRb;
+
+    private float verticalInput;
+    private float horizontalInput;
 
     public static PlayerControl Instance;
 
@@ -45,6 +49,9 @@ public class PlayerControl : MonoBehaviour
         else
             Destroy(gameObject);
 
+        // Get reference to player rigidbody component
+        playerRb = GetComponent<Rigidbody>();
+
         // Set max frame rate to avoid errors in editor
         Application.targetFrameRate = 144;
     }
@@ -55,8 +62,14 @@ public class PlayerControl : MonoBehaviour
         health = maxHealth;
         shield = maxShield;
 
-        // Set health and shield UI
+        // Set health UI
+        healthSlider.minValue = 0f;
+        healthSlider.maxValue = maxHealth;
         healthSlider.value = health;
+
+        // Set shield UI
+        shieldSlider.minValue = 0f;
+        shieldSlider.maxValue = maxShield;
         shieldSlider.value = shield;
 
         // Disable shield by default at start
@@ -67,8 +80,11 @@ public class PlayerControl : MonoBehaviour
 
     void Update()
     {
-        // Move player and rotate orb
-        Move();
+        // Get player input via WASD (used in FixedUpdate)
+        verticalInput = Input.GetAxis("Vertical");
+        horizontalInput = Input.GetAxis("Horizontal");
+
+        // Rotate orb to face mouse position
         MoveOrb();
         
         // Shoot projectile on left-click and when cooldown is zero
@@ -132,42 +148,48 @@ public class PlayerControl : MonoBehaviour
             ModifyShield(shieldRegen);
         }
 
-        // Freeze game when health is zero
-        if (health <= 0)
-        {
-            health = 0;
-            if (Time.timeScale > 0)
-                Time.timeScale = 0;
-        }
-
         // Update Health and Shield UI
         healthSlider.value = health;
         shieldSlider.value = shield;
+
+        // Temp code to freeze game when health is zero
+        if (health == 0 && Time.timeScale > 0)
+        {
+            Time.timeScale = 0;
+            currentShotCooldown = shotCooldown;
+        }
+    }
+
+    void FixedUpdate()
+    {
+        // Move player using rigidbody physics
+        Move();
     }
 
     // Method to move player
     void Move()
     {
-        // Get player input via WASD
-        float verticalMove = Input.GetAxis("Vertical");
-        float horizontalMove = Input.GetAxis("Horizontal");
-
         // Create direction vector based on player input
-        Vector3 movement = new Vector3(horizontalMove, 0, verticalMove);
+        Vector3 movement = new Vector3(horizontalInput, 0, verticalInput);
 
         // Clamp direction vector magnitude at 1 to prevent faster diagonal speed
         movement = Vector3.ClampMagnitude(movement, 1.0f);
 
-        // Move player
-        transform.Translate(movement * moveSpeed * Time.deltaTime);
+        // Move player (non-physics movement)
+        // transform.Translate(movement * moveSpeed * Time.deltaTime);
+
+        // Move player (via physics movement)
+        playerRb.linearVelocity = movement * moveSpeed;
     }
 
     // Method to spin orb around player to always point at mouse position
     void MoveOrb()
     {
+        // Draw a ray from camera through the mouse pointer
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
+        // Cast the ray until it hits an object in the selected layers
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, targetLayers))
         {
             // Get mouse position on ground level and direction from player
@@ -180,27 +202,34 @@ public class PlayerControl : MonoBehaviour
         }
     }
 
+    // Method to add or remove health
     public void ModifyHealth(float changeHealth)
     {
         health += changeHealth;
+
+        // Restrict value between zero and max
         if (health < 0)
             health = 0;
         else if (health > maxHealth)
             health = maxHealth;
     }
 
+    // Method to add or remove shield
     public void ModifyShield(float changeShield)
     {
         shield += changeShield;
+
+        // Restrict value between zero and max
         if (shield < 0)
             shield = 0;
         else if (shield > maxShield)
             shield = maxShield;
     }
 
+    // Method to enable or disable shield
     void ShieldActive(bool changeToState)
     {
-        if (changeToState )
+        if (changeToState)
         {
             shieldObject.SetActive(true);
             isShieldActive = true;
