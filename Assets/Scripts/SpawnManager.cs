@@ -39,11 +39,17 @@ public class SpawnManager : MonoBehaviour
         // Loop to spawn single enemies continuously with a delay in between
         while (true)
         {
-            // Spawn a single enemy
-            SpawnEnemy();
+            // Do not spawn more than max number of enemies
+            if (gameManager.enemiesOnScreen <= gameManager.maxEnemies)
+            {
+                // Spawn a single enemy
+                SpawnEnemy();
+                gameManager.enemiesOnScreen++;
+            }
+            else { yield break; }
 
             // Get the current difficulty stage
-            int newStage = (int)gameManager.GetTimeAlive() / stageLength;
+            int newStage = (int)gameManager.timeAlive / stageLength;
 
             // If stage advances, set new stage and reduce delay between enemy spawns
             if (currentStage < newStage)
@@ -72,7 +78,11 @@ public class SpawnManager : MonoBehaviour
         // Set spawn position at exactly a certain distance from player
         Vector3 spawnPosition = playerPosition + (randomDirection * spawnDistance);
 
+        // Set spawn rotation to prefab default and parent spawned enemy to enemy group object
+        Quaternion spawnRotation = enemyPrefab.transform.rotation;
+        Transform spawnParent = gameManager.enemyGroupObject;
+
         // Spawn the enemy
-        Instantiate(enemyPrefab, spawnPosition, enemyPrefab.transform.rotation);
+        Instantiate(enemyPrefab, spawnPosition, spawnRotation, spawnParent);
     }
 }

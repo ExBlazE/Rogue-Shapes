@@ -10,6 +10,7 @@ public class PlayerControl : MonoBehaviour
     [SerializeField] private LayerMask targetLayers;
 
     [Header("Movement")]
+    [SerializeField] private Animator playerAnim;
     [SerializeField] private float moveSpeed = 1f;
 
     [Header("Shooting")]
@@ -43,10 +44,12 @@ public class PlayerControl : MonoBehaviour
     [SerializeField] private float shield;
 
     private Rigidbody playerRb;
+    private Rigidbody orbFocusRb;
 
     private float verticalInput;
     private float horizontalInput;
 
+    private GameManager gameManager;
     public static PlayerControl Instance;
 
     void Awake()
@@ -57,8 +60,9 @@ public class PlayerControl : MonoBehaviour
         else
             Destroy(gameObject);
 
-        // Get reference to player rigidbody component
+        // Get reference to player and orb focus rigidbody components
         playerRb = GetComponent<Rigidbody>();
+        orbFocusRb = GetComponent<Rigidbody>();
 
         // Set max frame rate to avoid errors in editor
         Application.targetFrameRate = 144;
@@ -87,6 +91,9 @@ public class PlayerControl : MonoBehaviour
 
         // Get shield's renderer component
         shieldRenderer = shieldObject.GetComponent<Renderer>();
+
+        // Get reference to game manager via singleton
+        gameManager = GameManager.Instance;
     }
 
     void Update()
@@ -95,13 +102,22 @@ public class PlayerControl : MonoBehaviour
         verticalInput = Input.GetAxis("Vertical");
         horizontalInput = Input.GetAxis("Horizontal");
 
+        // Set animator parameters
+        SetMoveAnimParam();
+
         // Rotate orb to face mouse position
         MoveOrb();
         
         // Shoot projectile on left-click and when cooldown is zero
         if (Input.GetKeyDown(KeyCode.Mouse0) && currentShotCooldown == 0)
         {
-            Instantiate(projectilePrefab, orbObject.transform.position, orbFocus.transform.rotation);
+            // Get the spawn position, rotation and object transform to parent projectile to
+            Vector3 spawnPos = orbObject.transform.position;
+            Quaternion spawnRot = orbFocus.transform.rotation;
+            Transform spawnParent = gameManager.projectileGroupObject;
+
+            // Spawn the projectile and start cooldown
+            Instantiate(projectilePrefab, spawnPos, spawnRot, spawnParent);
             currentShotCooldown = shotCooldown;
         }
 
@@ -215,6 +231,20 @@ public class PlayerControl : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(mouseDirection);
             orbFocus.transform.rotation = Quaternion.Euler(0, targetRotation.eulerAngles.y, 0);
         }
+    }
+
+    // Method to set animator parameters according to player velocity
+    void SetMoveAnimParam()
+    {
+        // Get world space velocity of orb focus from its rigidbody
+        Vector3 worldVelocity = orbFocusRb.linearVelocity;
+
+        // Convert to local space velocity
+        Vector3 localVelocity = orbFocus.transform.InverseTransformDirection(worldVelocity);
+
+        // Set animator parameters accordingly
+        playerAnim.SetFloat("f_moveForward", localVelocity.z);
+        playerAnim.SetFloat("f_moveRight", localVelocity.x);
     }
 
     // Method to add or remove health

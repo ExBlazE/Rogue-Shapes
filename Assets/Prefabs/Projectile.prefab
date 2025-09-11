@@ -272,9 +272,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12c13f434cd7ba1498fb7cc9f06eab2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 20
+  speed: 15
   duration: 2
   enemyShotDamage: 10
+  playerHitFX: {fileID: 3530602592195554942, guid: 2357d65771edfb748a6b358423f0d9d7, type: 3}
+  shieldHitFX: {fileID: 7087085551002705231, guid: 4cfc60420030ef5489d3c3e8610d64d2, type: 3}
+  enemyHitFX: {fileID: 5807674313315765336, guid: a3672f5751bf6814baf44fb507bfbb82, type: 3}
 --- !u!1001 &3377203784661916984
 PrefabInstance:
   m_ObjectHideFlags: 0

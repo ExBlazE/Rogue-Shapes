@@ -5,7 +5,6 @@ public class Enemy : MonoBehaviour
     [SerializeField] private GameObject focus;
     [SerializeField] private bool canMove = true;
     [SerializeField] private float moveSpeed = 2.5f;
-    [SerializeField] private float rotateSpeed = 180f;
 
     [Space]
     [SerializeField] private GameObject projectilePrefab;
@@ -17,17 +16,32 @@ public class Enemy : MonoBehaviour
     private float shotRangeSqr;
     private float currentCooldown = 0f;
 
-    private Rigidbody enemyRb;
-    private PlayerControl player;
+    [Space]
+    [SerializeField] private Animator enemyAnim;
 
+    [Space]
+    [SerializeField] private ParticleSystem playerCollideFX;
+    [SerializeField] private ParticleSystem shieldCollideFX;
+
+    private Rigidbody enemyRb;
+
+    private GameManager gameManager;
+    private PlayerControl player;
+    
     void Awake()
     {
-        player = PlayerControl.Instance;
+        // Get reference to rigidbody and animator components
         enemyRb = GetComponent<Rigidbody>();
     }
 
     void Start()
     {
+        // Get reference to player script via singleton
+        player = PlayerControl.Instance;
+
+        // Get reference to game manager via singleton
+        gameManager = GameManager.Instance;
+
         // Calculate square of shot range
         shotRangeSqr = shotRange * shotRange;
     }
@@ -43,7 +57,11 @@ public class Enemy : MonoBehaviour
         {
             if (currentCooldown == 0 && canShoot)
             {
-                Instantiate(projectilePrefab, focus.transform.position, transform.rotation);
+                Vector3 spawnPos = focus.transform.position;
+                Quaternion spawnRot = transform.rotation;
+                Transform spawnParent = gameManager.projectileGroupObject;
+
+                Instantiate(projectilePrefab, spawnPos, spawnRot, spawnParent);
                 currentCooldown = shotCooldown;
             }
         }
@@ -56,8 +74,8 @@ public class Enemy : MonoBehaviour
                 currentCooldown = 0;
         }
 
-        // Temp code to rotate mesh for visual effect
-        focus.transform.Rotate(new Vector3(0, 0, rotateSpeed * Time.deltaTime), Space.World);
+        // Set movement animation parameters
+        enemyAnim.SetFloat("f_speed", enemyRb.linearVelocity.magnitude);
     }
 
     void FixedUpdate()
@@ -98,6 +116,8 @@ public class Enemy : MonoBehaviour
         // If touching player, deplete health
         if (collision.gameObject.CompareTag("Player"))
         {
+            Instantiate(playerCollideFX, focus.transform.position, Quaternion.identity, gameManager.particlesGroupObject);
+
             player.ModifyHealth(-collisionDamage);
             Destroy(gameObject);
         }
@@ -109,6 +129,8 @@ public class Enemy : MonoBehaviour
         // If touching shield, deplete shield
         if (other.CompareTag("Shield"))
         {
+            Instantiate(shieldCollideFX, focus.transform.position, Quaternion.identity, gameManager.particlesGroupObject);
+
             player.ModifyShield(-collisionDamage);
             Destroy(gameObject);
         }

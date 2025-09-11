@@ -6,8 +6,20 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI timeText;
     [SerializeField] private TextMeshProUGUI scoreText;
 
-    private int score = 0;
-    private float timeAlive = 0;
+    [Space]
+    public Transform enemyGroupObject;
+    public Transform projectileGroupObject;
+    public Transform particlesGroupObject;
+
+    private int score;
+    public float timeAlive { get; private set; }
+
+    // Cap max enemies for performance
+    public int maxEnemies { get; private set; } = 20;
+
+    [Space]
+    [Header("Info (Do not change)")]
+    public int enemiesOnScreen;
 
     public static GameManager Instance;
 
@@ -57,11 +69,5 @@ public class GameManager : MonoBehaviour
     {
         // Show score text in a two digit format
         scoreText.SetText("Score: " + score.ToString("D2"));
-    }
-
-    // Public method to get player alive time in other scripts
-    public float GetTimeAlive()
-    {
-        return timeAlive;
     }
 }

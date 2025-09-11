@@ -8,6 +8,11 @@ public class Projectile : MonoBehaviour
     [Space]
     [SerializeField] private float enemyShotDamage = 10;
 
+    [Space]
+    [SerializeField] private ParticleSystem playerHitFX;
+    [SerializeField] private ParticleSystem shieldHitFX;
+    [SerializeField] private ParticleSystem enemyHitFX;
+
     private PlayerControl player;
     private GameManager gameManager;
 
@@ -41,9 +46,13 @@ public class Projectile : MonoBehaviour
         // Logic for player projectiles hitting enemies
         if (gameObject.CompareTag("Shot_Player") && other.CompareTag("Enemy"))
         {
+            Instantiate(playerHitFX, transform.position, Quaternion.identity, gameManager.particlesGroupObject);
             gameManager.AddScore(1);
+
             Destroy(other.gameObject);
             Destroy(gameObject);
+
+            gameManager.enemiesOnScreen--;
         }
 
         // Logic for enemy projectiles
@@ -52,6 +61,8 @@ public class Projectile : MonoBehaviour
             // Logic for hitting shield
             if (other.CompareTag("Shield"))
             {
+                Instantiate(shieldHitFX, transform.position, Quaternion.identity, gameManager.particlesGroupObject);
+
                 player.ModifyShield(-enemyShotDamage);
                 Destroy(gameObject);
             }
@@ -59,6 +70,8 @@ public class Projectile : MonoBehaviour
             //Logic for hitting player
             else if (other.CompareTag("Player"))
             {
+                Instantiate(enemyHitFX, transform.position, Quaternion.identity, gameManager.particlesGroupObject);
+
                 player.ModifyHealth(-enemyShotDamage);
                 Destroy(gameObject);
             }
