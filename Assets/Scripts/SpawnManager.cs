@@ -40,13 +40,14 @@ public class SpawnManager : MonoBehaviour
         while (true)
         {
             // Do not spawn more than max number of enemies
-            if (gameManager.enemiesOnScreen <= gameManager.maxEnemies)
+            while (gameManager.enemiesOnScreen >= gameManager.maxEnemies)
             {
-                // Spawn a single enemy
-                SpawnEnemy();
-                gameManager.enemiesOnScreen++;
+                yield return null;
             }
-            else { yield break; }
+
+            // Spawn a single enemy
+            SpawnEnemy();
+            gameManager.enemiesOnScreen++;
 
             // Get the current difficulty stage
             int newStage = (int)gameManager.timeAlive / stageLength;

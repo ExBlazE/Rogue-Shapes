@@ -120,6 +120,8 @@ public class Enemy : MonoBehaviour
 
             player.ModifyHealth(-collisionDamage);
             Destroy(gameObject);
+
+            gameManager.enemiesOnScreen--;
         }
     }
 
@@ -133,6 +135,8 @@ public class Enemy : MonoBehaviour
 
             player.ModifyShield(-collisionDamage);
             Destroy(gameObject);
+
+            gameManager.enemiesOnScreen--;
         }
     }
 }

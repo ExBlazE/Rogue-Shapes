@@ -15,7 +15,11 @@ public class GameManager : MonoBehaviour
     public float timeAlive { get; private set; }
 
     // Cap max enemies for performance
-    public int maxEnemies { get; private set; } = 20;
+    public int maxEnemies { get; private set; }
+
+    [Space]
+    [Header("Settings")]
+    [SerializeField] private int setMaxEnemies = 20;
 
     [Space]
     [Header("Info (Do not change)")]
@@ -36,6 +40,7 @@ public class GameManager : MonoBehaviour
     {
         timeAlive = 0;
         score = 0;
+        maxEnemies = setMaxEnemies;
     }
 
     void Update()
@@ -43,6 +48,9 @@ public class GameManager : MonoBehaviour
         // Update the time and score UI every frame
         UpdateTime();
         UpdateScore();
+
+        // Update max enemies count in real time
+        maxEnemies = setMaxEnemies;
     }
 
     // Method to add score
