@@ -46,7 +46,7 @@ public class Projectile : MonoBehaviour
         // Logic for player projectiles hitting enemies
         if (gameObject.CompareTag("Shot_Player") && other.CompareTag("Enemy"))
         {
-            Instantiate(playerHitFX, transform.position, Quaternion.identity, gameManager.particlesGroupObject);
+            Instantiate(playerHitFX, transform.position, transform.rotation, gameManager.particlesGroupObject);
             gameManager.AddScore(1);
 
             Destroy(other.gameObject);
@@ -61,7 +61,7 @@ public class Projectile : MonoBehaviour
             // Logic for hitting shield
             if (other.CompareTag("Shield"))
             {
-                Instantiate(shieldHitFX, transform.position, Quaternion.identity, gameManager.particlesGroupObject);
+                Instantiate(shieldHitFX, transform.position, transform.rotation, gameManager.particlesGroupObject);
 
                 player.ModifyShield(-enemyShotDamage);
                 Destroy(gameObject);
@@ -70,7 +70,7 @@ public class Projectile : MonoBehaviour
             //Logic for hitting player
             else if (other.CompareTag("Player"))
             {
-                Instantiate(enemyHitFX, transform.position, Quaternion.identity, gameManager.particlesGroupObject);
+                Instantiate(enemyHitFX, transform.position, transform.rotation, gameManager.particlesGroupObject);
 
                 player.ModifyHealth(-enemyShotDamage);
                 Destroy(gameObject);

@@ -116,7 +116,7 @@ public class Enemy : MonoBehaviour
         // If touching player, deplete health
         if (collision.gameObject.CompareTag("Player"))
         {
-            Instantiate(playerCollideFX, focus.transform.position, Quaternion.identity, gameManager.particlesGroupObject);
+            Instantiate(playerCollideFX, focus.transform.position, transform.rotation, gameManager.particlesGroupObject);
 
             player.ModifyHealth(-collisionDamage);
             Destroy(gameObject);
@@ -129,7 +129,7 @@ public class Enemy : MonoBehaviour
         // If touching shield, deplete shield
         if (other.CompareTag("Shield"))
         {
-            Instantiate(shieldCollideFX, focus.transform.position, Quaternion.identity, gameManager.particlesGroupObject);
+            Instantiate(shieldCollideFX, focus.transform.position, transform.rotation, gameManager.particlesGroupObject);
 
             player.ModifyShield(-collisionDamage);
             Destroy(gameObject);
